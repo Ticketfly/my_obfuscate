@@ -1,14 +1,22 @@
 class MyObfuscate
   class Mysql
     include MyObfuscate::InsertStatementParser
+    include MyObfuscate::ConfigScaffoldGenerator
 
     def parse_insert_statement(line)
-      if regex_match = insert_regex.match(line)
-        {
-            :ignore     => !regex_match[1].nil?,
-            :table_name => regex_match[2].to_sym,
-            :column_names => regex_match[3].split(/`\s*,\s*`/).map { |col| col.gsub('`', "").to_sym }
-        }
+      lineUTF=line.force_encoding('UTF-8')
+      begin
+        if regex_match = insert_regex.match(lineUTF)
+          {
+              :ignore     => !regex_match[1].nil?,
+              :table_name => regex_match[2].to_sym,
+              :column_names => regex_match[3].split(/`\s*,\s*`/).map { |col| col.gsub('`', "").to_sym }
+          }
+          $stderr.puts
+        end
+      rescue Exception => e
+        $stderr.puts "exception: #{e.message}"
+        $stderr.puts line[0..119]
       end
     end
 
